@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   BrowserRouter as Router,
   Route,
@@ -30,6 +30,7 @@ import Home from '../pages/home';
 import LiquidityPage from '../pages/LiquidityPage';
 import TransactionsPage from '../pages/Transactions';
 import AdminPage from '../pages/Admin';
+import LPServicePage from '../pages/LPServicePage';
 
 const Layout = () => (
   <>
@@ -42,6 +43,8 @@ const Layout = () => (
 );
 
 const App = () => {
+  const [appKitReady, setAppKitReady] = useState(false);
+  
   // Initialize AppKit on app startup
   useEffect(() => {
     console.log('[App] Starting initialization...');
@@ -50,8 +53,10 @@ const App = () => {
     try {
       const result = initAppKit();
       console.log('[App] AppKit initialization result:', result ? 'Success' : 'Failed/Skipped');
+      setAppKitReady(true);
     } catch (error) {
       console.error('[App] AppKit initialization error:', error);
+      setAppKitReady(true); // Set ready even if failed to allow app to continue
     }
     
     // Connect notification manager to services
@@ -59,6 +64,22 @@ const App = () => {
     
     console.log('[App] App initialization completed');
   }, []);
+  
+  // Show loading state while AppKit initializes
+  if (!appKitReady) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '1.2rem',
+        color: 'var(--text-primary)'
+      }}>
+        Initializing...
+      </div>
+    );
+  }
 
   return (
     <ContractProvider>
@@ -68,6 +89,7 @@ const App = () => {
             <Route index element={<Home />} />
             <Route path="swap" element={<Home />} />
             <Route path="liquidity" element={<LiquidityPage />} />
+            <Route path="lp-service" element={<LPServicePage />} />
             <Route path="transactions" element={<TransactionsPage />} />
             <Route path="admin" element={<AdminPage />} />
           </Route>
